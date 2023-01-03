@@ -14,7 +14,7 @@ use Drupal\Core\Form\FormStateInterface;
  * different settings.
  *
  * @FieldFormatter(
- *   id = "number_accession",
+ *   id = "accession_reference",
  *   label = @Translation("Default"),
  *   field_types = {
  *     "accession_reference"
@@ -27,25 +27,19 @@ class AccessionReferenceFormatter extends FormatterBase {
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    $options = [
-      '.' => $this->t('Decimal point'),
-      ',' => $this->t('Comma'),
-      '/' => $this->t('Slash'),
-      chr(8201) => $this->t('Thin space'),
-      "'" => $this->t('Apostrophe'),
-    ];
-    $elements['separator'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Separator'),
-      '#options' => $options,
-      '#default_value' => $this->getSetting('separator'),
-      '#weight' => 0,
+    $elements['zeropad_main'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Zero Pad main value'),
+      '#description' => $this->t('Prefix main value with zeroes up to max value digits.'),
+      '#default_value' => $this->getSetting('zeropad_main'),
+      '#weight' => 10,
     ];
 
-    $elements['prefix_suffix'] = [
+    $elements['zeropad_sub'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Display prefix and suffix'),
-      '#default_value' => $this->getSetting('prefix_suffix'),
+      '#title' => $this->t('Zero Pad sub value'),
+      '#description' => $this->t('Prefix sub value with zeroes up to max value digits.'),
+      '#default_value' => $this->getSetting('zeropad_sub'),
       '#weight' => 10,
     ];
 
@@ -58,8 +52,11 @@ class AccessionReferenceFormatter extends FormatterBase {
   public function settingsSummary() {
     $summary = [];
 
-    $summary[] = $this->t('Value separator @sep.',
-      ["@sep" => $this->getSetting('separator')]);
+    $summary[] = $this->t('Ref padding (@pm, @ps).',
+      [
+        "@pm" => $this->getSetting('zeropad_main') ? $this->t('Yes') :  $this->t('No'),
+        "@ps" => $this->getSetting('zeropad_sub') ? $this->t('Yes') :  $this->t('No'),
+      ]);
     $summary[] = $this->numberFormat(1234,5678);
 
     return $summary;
@@ -70,14 +67,21 @@ class AccessionReferenceFormatter extends FormatterBase {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
+    $separator = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('separator');
+    $settings = $this->getFieldSettings();
 
     foreach ($items as $delta => $item) {
-      $output = $this->numberFormat($item->value, $item->sub_value);
-      if (isset($item->_attributes) && $item->value != $output) {
-        $item->_attributes += ['value' => $item->value, 'sub_value' => $item->sub_value];
-      }
-
-      $elements[$delta] = ['#markup' => $output];
+      //$output = $this->numberFormat($item->value, $item->sub_value);
+      $elements[$delta] = [
+        '#type' => 'accession_reference',
+        '#main' => $item->value,
+        '#sub' => $item->sub_value,
+        '#sep' => $separator,
+        '#digits_main' => (strlen((string)$settings['main_max']) ?: 9999),
+        '#digits_sub' => (strlen((string)$settings['sub_max']) ?: 9999),
+        '#zeropad_main' => $settings['zeropad_main'],
+        '#zeropad_sub' => $settings['zeropad_sub'],
+      ];
     }
 
     return $elements;
@@ -88,7 +92,8 @@ class AccessionReferenceFormatter extends FormatterBase {
    */
   public static function defaultSettings() {
     return [
-      'separator' => '/',
+      'zeropad_main' => FALSE,
+      'zeropad_sub' => TRUE,
     ] + parent::defaultSettings();
   }
 
@@ -96,11 +101,12 @@ class AccessionReferenceFormatter extends FormatterBase {
    * {@inheritdoc}
    */
   protected function numberFormat($number, $number2) {
+    $separator = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('separator');
     $settings = $this->getFieldSettings();
-    $digits_main = ((int)log($settings['main_max'] ?: 9999)) + 1;
-    $digits_sub = ((int)log($settings['sub_max'] ?: 9999)) + 1;
-    $format = '%1$0'.$digits_main.'d'.'%3$'.'s'.'%2$0'.$digits_sub.'d';
-    return sprintf($format, $number, $number2, $this->getSetting('separator'));
+    $digits_main = strlen((string)$settings['main_max']) ?: 9999;
+    $digits_sub = strlen((string)$settings['sub_max']) ?: 9999;
+    $format = '%1$0'.$digits_main.'d'.'%3$s'.'%2$0'.$digits_sub.'d';
+    return sprintf($format, $number, $number2, $separator);
   }
 
 }

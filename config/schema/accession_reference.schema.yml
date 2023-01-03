@@ -1,0 +1,76 @@
+# Schema for the configuration files of the Accession Reference module.
+
+# Formatters schema.
+field.formatter.settings.accession_reference:
+  type: mapping
+  label: 'Accession Reference format settings'
+  mapping:
+    zeropad_main:
+      type: boolean
+      label: 'Zero Pad the Main value'
+    zeropad_sub:
+      type: boolean
+      label: 'Zero Pad the Sub value'
+
+# Widget schema.
+field.widget.settings.accession_reference:
+  type: mapping
+  label: 'Accession Reference format settings'
+  mapping:
+    main_placeholder:
+      type: string
+      label: 'Placeholder for main value'
+    main_min:
+      type: integer
+      label: 'Minimum value of the main value.'
+    main_max:
+      type: integer
+      label: 'Maximum value of the main value.'
+    sub_placeholder:
+      type: string
+      label: 'Placeholder for sub value'
+    sub_min:
+      type: integer
+      label: 'Minimum value of the main value.'
+    sub_max:
+      type: integer
+      label: 'Maximum value of the sub field'
+
+# Storage schema.
+field.storage_settings.accession_reference:
+  type: mapping
+  label: 'Accession Reference settings'
+  mapping:
+    value:
+      type: string
+      label: 'Main value'
+    sub_value:
+      type: string
+      label: 'Sub value'
+    options:
+      type: mapping
+      label: 'Accession Reference options'
+
+# Instance schema.
+field.field_settings.accession_reference:
+  type: mapping
+  label: 'Accession Reference settings'
+  mapping:
+    separator:
+      type: string
+      label: 'Value separator character'
+
+# Default value schema.
+field.value.accession_reference:
+  type: mapping
+  label: 'Default value'
+  mapping:
+    value:
+      type: string
+      label: 'Main value'
+    sub_value:
+      type: string
+      label: 'Sub value'
+    options:
+      type: mapping
+      label: 'Accession Reference options'

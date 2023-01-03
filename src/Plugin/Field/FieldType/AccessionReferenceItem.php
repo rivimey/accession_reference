@@ -8,9 +8,10 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\TypedData\MapDataDefinition;
 
 /**
- * Defines the 'accession referende' field type.
+ * Defines the 'accession reference' field type.
  *
  * @FieldType(
  *   id = "accession_reference",
@@ -18,20 +19,18 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  *   description = @Translation("This field stores an accession reference in the database as an integer pair."),
  *   category = @Translation("Number"),
  *   default_widget = "accession_reference",
- *   default_formatter = "number_accession"
+ *   default_formatter = "accession_reference"
  * )
+ * // also list_class=, constraints=
  */
-class AccessionReferenceItem extends FieldItemBase {
+class AccessionReferenceItem extends FieldItemBase implements AccessionReferenceItemInterface
+{
 
   /**
    * {@inheritdoc}
    */
   public static function defaultFieldSettings() {
     return [
-        'main_min' => '',
-        'main_max' => '',
-        'sub_min' => '',
-        'sub_max' => '',
         'separator' => '/',
       ] + parent::defaultFieldSettings();
   }
@@ -39,57 +38,8 @@ class AccessionReferenceItem extends FieldItemBase {
   /**
    * {@inheritdoc}
    */
-//  public function storageSettingsForm(array &$form, FormStateInterface $form_state, $has_data): array {
-//
-//    $settings = $this->getSettings();
-//
-//    return $element;
-//  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
-    $element = [];
-    $settings = $this->getSettings();
-
-    $element['main_min'] = [
-      '#type' => 'number',
-      '#title' => $this->t('Main minimum'),
-      '#default_value' => $settings['main_min'],
-      '#description' => $this->t('The minimum value that should be allowed in the main field.'),
-    ];
-    $element['main_max'] = [
-      '#type' => 'number',
-      '#title' => $this->t('Main maximum'),
-      '#default_value' => $settings['main_max'],
-      '#description' => $this->t('The maximum value that should be allowed in the main field.'),
-    ];
-
-    $element['sub_min'] = [
-      '#type' => 'number',
-      '#title' => $this->t('Sub Minimum'),
-      '#default_value' => $settings['sub_min'],
-      '#description' => $this->t('The minimum value that should be allowed in the sub field. Leave blank for no minimum.'),
-    ];
-    $element['sub_max'] = [
-      '#type' => 'number',
-      '#title' => $this->t('Sub Maximum'),
-      '#default_value' => $settings['sub_max'],
-      '#description' => $this->t('The maximum value that should be allowed in the sub field. Leave blank for no maximum.'),
-    ];
-
-    return $element;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function isEmpty() {
-    if (empty($this->value) && empty($this->sub_value)) {
-      return TRUE;
-    }
-    return FALSE;
+    return empty($this->value) && empty($this->sub_value);
   }
 
   /**
@@ -121,7 +71,7 @@ class AccessionReferenceItem extends FieldItemBase {
         'sub_value' => [
           'Range' => [
             'min' => $sub_min,
-            'minMessage' => $this->t('%name: the value may be no less than %min.',
+            'minMessage' => $this->t('%name: the sub value may be no less than %min.',
               ['%name' => $label, '%min' => $sub_min]),
           ],
         ],
@@ -160,12 +110,62 @@ class AccessionReferenceItem extends FieldItemBase {
   /**
    * {@inheritdoc}
    */
-  public static function defaultStorageSettings() {
+  public static function schema(FieldStorageDefinitionInterface $field_definition) {
     return [
-      // Valid size values: 'tiny', 'small', 'medium', 'normal' and 'big'.
-      'size' => 'normal',
-      'sub_size' => 'normal',
-    ] + parent::defaultStorageSettings();
+      'columns' => [
+        'value' => [
+          'type' => 'int',
+          'description' => 'The group number of the reference.',
+          'unsigned' => TRUE,
+          // Valid size values: 'tiny', 'small', 'medium', 'normal' and 'big'.
+          // For instance, supply 'big' as a value to produce a 'bigint' type.
+          'size' => 'normal',
+          'default' => 0,
+        ],
+        'sub_value' => [
+          'type' => 'int',
+          'description' => 'The item number of the reference.',
+          'unsigned' => TRUE,
+          // Valid size values: 'tiny', 'small', 'medium', 'normal' and 'big'.
+          // For instance, supply 'big' as a value to produce a 'bigint' type.
+          'size' => 'normal',
+          'default' => 0,
+        ],
+        'options' => [
+          'description' => 'Serialized array of options',
+          'type' => 'blob',
+          'size' => 'normal',
+          'serialize' => TRUE,
+        ],
+      ],
+      'indexes' => [
+        'value_sub_value' => ['value', 'sub_value'],
+      ],
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
+    $element = parent::fieldSettingsForm($form, $form_state);
+
+    $options = [
+      '.' => $this->t('Decimal point'),
+      ',' => $this->t('Comma'),
+      '/' => $this->t('Slash'),
+      chr(8201) => $this->t('Thin space'),
+      "'" => $this->t('Apostrophe'),
+    ];
+    $elements['separator'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Separator'),
+      '#options' => $options,
+      '#default_value' => $this->getSetting('separator'),
+      '#weight' => 0,
+    ];
+
+    return $elements;
   }
 
   /**
@@ -180,44 +180,24 @@ class AccessionReferenceItem extends FieldItemBase {
       ->setLabel(new TranslatableMarkup('Sub'))
       ->setRequired(TRUE);
 
+    $properties['options'] = MapDataDefinition::create()
+      ->setLabel(new TranslatableMarkup('Options'));
+
     return $properties;
   }
 
   /**
    * {@inheritdoc}
-   */
-  public static function schema(FieldStorageDefinitionInterface $field_definition) {
-    return [
-      'columns' => [
-        'value' => [
-          'type' => 'int',
-          'unsigned' => TRUE,
-          // Valid size values: 'tiny', 'small', 'medium', 'normal' and 'big'.
-          // For instance, supply 'big' as a value to produce a 'bigint' type.
-          'size' => 'normal',
-        ],
-        'sub_value' => [
-          'type' => 'int',
-          'unsigned' => TRUE,
-          // Valid size values: 'tiny', 'small', 'medium', 'normal' and 'big'.
-          // For instance, supply 'big' as a value to produce a 'bigint' type.
-          'size' => 'normal',
-        ],
-      ],
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
+   * @throws \Exception
    */
   public static function generateSampleValue(FieldDefinitionInterface $field_definition) {
     $min = $field_definition->getSetting('main_min') ?: 1000;
     $max = $field_definition->getSetting('main_max') ?: 9000;
-    $values['value'] = mt_rand($min, $max);
+    $values['value'] = random_int($min, $max);
 
     $min = $field_definition->getSetting('sub_min') ?: 1;
     $max = $field_definition->getSetting('sub_max') ?: 999;
-    $values['sub_value'] = mt_rand($min, $max);
+    $values['sub_value'] = random_int($min, $max);
 
     return $values;
   }
