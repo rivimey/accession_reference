@@ -1,0 +1,16 @@
+/* We have a fieldset for management's sake, but hide its effects. */
+.field--type-accession-reference > fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+.field--type-accession-reference .fieldset__label,
+.field--type-accession-reference .fieldset__wrapper {
+  margin: 0;
+  padding: 0;
+}
+
+.field--type-accession-reference .fieldset__wrapper .sep {
+  font-weight: bold;
+  font-size: larger;
+}

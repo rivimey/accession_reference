@@ -1,0 +1,9 @@
+accession_reference:
+#  js:
+#    js/accession_reference.js: {}
+  css:
+    theme:
+      css/accession_reference.css: {}
+  dependencies:
+    - core/drupal
+    - core/once

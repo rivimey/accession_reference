@@ -1,0 +1,10 @@
+name: GERS Gallery Site module
+type: module
+description: 'Support GERS Gallery website.'
+core_version_requirement: ^9 || ^10
+
+dependencies:
+  - 'drupal:system (>= 9.4)'
+
+package: Other
+configure: gersgal.settings

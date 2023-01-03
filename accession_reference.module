@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * Implements hook_theme().
+ */
+function accession_reference_theme(): array {
+  $item = ['render element' => 'elements'];
+  return [
+    'accession_reference_item' => $item,
+    'accession_reference_subfield' => $item,
+    'accession_reference_definition_list' => $item,
+  ];
+}
+
+/**
+ * Prepares variables for double-field-item template.
+ */
+function template_preprocess_accession_reference_item(array &$variables): void {
+  $variables['settings'] = $variables['elements']['#settings'];
+  $variables['field_settings'] = $variables['elements']['#field_settings'];
+  $variables['item']['value'] = $variables['elements']['#item']->value;
+  $variables['item']['sub_value'] = $variables['elements']['#item']->sub_value;
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function accession_reference_theme_suggestions_accession_reference_item(array $variables): array {
+  return [
+    'accession_reference_item__' . $variables['elements']['#field_name']
+  ];
+}
