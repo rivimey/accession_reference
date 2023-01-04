@@ -1,36 +1,11 @@
 <?php
 
-
 /**
  * Implements hook_requirements().
  * For some reason it doesn't apply to themes.
  */
 function accession_reference_requirements($phase) {
   $requirements = [];
-
-  // Ensure translations don't break at install time.
-  $t = 't';
-
-  // Always check these, independent of the current phase.
-  $function_list = [
-    'exec',
-    'copy',
-    'mkdir',
-  ];
-  // Check each function to make sure it exists.
-  foreach ($function_list as $function_name) {
-    if (!function_exists($function_name)) {
-      $requirements['tull_function_' . $function_name] = [
-        'title' => $t('Tull theme function Disabled'),
-        'value' => $phase === 'install' ? FALSE : $function_name,
-        'severity' => REQUIREMENT_ERROR,
-        'description' => $t('<a href="!url">%name()</a> is disabled on this server. Please contact your hosting provider or server administrator and see if they can re-enable this function for you.', [
-          '!url' => 'http://php.net/' . str_replace('_', '-', $function_name),
-          '%name' => $function_name,
-        ]),
-      ];
-    }
-  }
 
   // If not at runtime, return here.
   if ($phase !== 'runtime') {

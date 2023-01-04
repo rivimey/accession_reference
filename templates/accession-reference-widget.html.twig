@@ -1,0 +1,88 @@
+{#
+  Twig renderer for the Accession Reference Widget. Variables available include:
+
+  "elements" => [
+    "#type" => "accession_reference_widget"
+    "#title" => "GERS Accession Reference"
+    "#required" => false
+    "#description" => ""
+    "#description_display" => "after"
+    "#title_display" => "before"
+    "groupref" => [
+      "#groupref" => ""
+      "#tip" => Drupal\Core\StringTranslation\TranslatableMarkup
+      "#size" => 4
+      "#placeholder" => ""
+      "#pattern" => "\d{1,4}"
+      "#attributes" => Drupal\Core\Template\Attribute
+      "#tree" => true
+      "#weight" => 0
+      "#processed" => false
+      "#required" => false
+      // notused:
+      "#title_display" => "before"
+      // notused:
+      "#description_display" => "after"
+      "#errors" => null
+      "#id" => "edit-default-value-input-field-accession-reference-0-value-groupref"
+      "#sorted" => true
+    ]
+    "#separator" => null
+    "itemref" => [
+      "#itemref" => ""
+      "#tip" => Drupal\Core\StringTranslation\TranslatableMarkup
+      "#size" => 4
+      "#placeholder" => ""
+      "#pattern" => "\d{1,4}"
+      "#attributes" => Drupal\Core\Template\Attribute
+      "#tree" => true
+      "#weight" => 0.001
+      "#required" => false
+      // notused:
+      "#title_display" => "before"
+      // notused:
+      "#description_display" => "after"
+      "#errors" => null
+      "#id" => "edit-default-value-input-field-accession-reference-0-value-itemref"
+      "#sorted" => true
+    ]
+    "#attributes" => Drupal\Core\Template\Attribute
+    "#attached" => []
+    "#pre_render" => []
+    "#element_validate" => []
+    "#input" => true
+    "#multiple" => false
+    "#default_value" => []
+    "#theme" => "accession_reference_widget"
+    "#theme_wrappers" => []
+    "#value_callback" => []
+    "#tree" => true
+    "#weight" => 0
+    "#errors" => null
+    "#id" => "edit-default-value-input-field-accession-reference-0-value"
+    "#name" => "default_value_input[field_accession_reference][0][value]"
+    "#value" => []
+  ]
+  "theme_hook_original" => "accession_reference_widget"
+  "attributes" => Drupal\Core\Template\Attribute
+  "title_attributes" => Drupal\Core\Template\Attribute
+  "content_attributes" => Drupal\Core\Template\Attribute
+  "title_prefix" => []
+  "title_suffix" => []
+  "item" => [
+    "groupref" => 0,
+    "itemref" => 0,
+    "separator" => "/",
+  ],
+  "is_admin" => bool
+  "logged_in" => bool
+  "user" => Drupal\Core\Session\AccountProxy
+  "directory" => "themes/contrib/gin"
+  "settings" => null
+  "field_settings" => null
+  "theme_hook_suggestions" => []
+#}
+<span class="accession-reference groupref"><input{{ item.groupref.attributes }}/></span>
+<span class="accession-reference separator">{{ item.separator }}</span>
+<span class="accession-reference itemref"><input{{ item.itemref.attributes }}/></span>
+{{ children }}

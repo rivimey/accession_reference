@@ -28,12 +28,12 @@ class AccessionReferenceWidget extends WidgetBase {
    */
   public static function defaultSettings() {
     return [
-        'main_min' => '1',
-        'main_max' => '9999',
-        'main_placeholder' => '',
-        'sub_min' => '1',
-        'sub_max' => '9999',
-        'sub_placeholder' => '',
+        'groupref_min' => '1',
+        'groupref_max' => '9999',
+        'groupref_placeholder' => '',
+        'itemref_min' => '1',
+        'itemref_max' => '9999',
+        'itemref_placeholder' => '',
       ] + parent::defaultSettings();
   }
 
@@ -41,41 +41,41 @@ class AccessionReferenceWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    $element['main_min'] = [
+    $element['groupref_min'] = [
       '#type' => 'number',
-      '#title' => $this->t('Main minimum'),
-      '#default_value' => $this->getSetting('main_min'),
-      '#description' => $this->t('The minimum value that should be allowed in the main field.'),
+      '#title' => $this->t('Groupref minimum'),
+      '#default_value' => $this->getSetting('groupref_min'),
+      '#description' => $this->t('The minimum value that should be allowed in the groupref field.'),
     ];
-    $element['main_max'] = [
+    $element['groupref_max'] = [
       '#type' => 'number',
-      '#title' => $this->t('Main maximum'),
-      '#default_value' => $this->getSetting('main_max'),
-      '#description' => $this->t('The maximum value that should be allowed in the main field.'),
+      '#title' => $this->t('Groupref maximum'),
+      '#default_value' => $this->getSetting('groupref_max'),
+      '#description' => $this->t('The maximum value that should be allowed in the groupref field.'),
     ];
-    $element['sub_min'] = [
+    $element['itemref_min'] = [
       '#type' => 'number',
-      '#title' => $this->t('Sub Minimum'),
-      '#default_value' => $this->getSetting('sub_min'),
-      '#description' => $this->t('The minimum value that should be allowed in the sub field. Leave blank for no minimum.'),
+      '#title' => $this->t('Itemref Minimum'),
+      '#default_value' => $this->getSetting('itemref_min'),
+      '#description' => $this->t('The minimum value that should be allowed in the itemref field.'),
     ];
-    $element['sub_max'] = [
+    $element['itemref_max'] = [
       '#type' => 'number',
-      '#title' => $this->t('Sub Maximum'),
-      '#default_value' => $this->getSetting('sub_max'),
-      '#description' => $this->t('The maximum value that should be allowed in the sub field. Leave blank for no maximum.'),
+      '#title' => $this->t('Itemref Maximum'),
+      '#default_value' => $this->getSetting('itemref_max'),
+      '#description' => $this->t('The maximum value that should be allowed in the itemref field.'),
     ];
 
-    $element['main_placeholder'] = [
+    $element['groupref_placeholder'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Main Placeholder'),
-      '#default_value' => $this->getSetting('main_placeholder'),
+      '#title' => $this->t('Groupref Placeholder'),
+      '#default_value' => $this->getSetting('groupref_placeholder'),
       '#description' => $this->t('Text that will be shown inside the field until a value is entered. This hint is usually a sample value.'),
     ];
-    $element['sub_placeholder'] = [
+    $element['itemref_placeholder'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Sub Placeholder'),
-      '#default_value' => $this->getSetting('sub_placeholder'),
+      '#title' => $this->t('Itemref Placeholder'),
+      '#default_value' => $this->getSetting('itemref_placeholder'),
       '#description' => $this->t('Text that will be shown inside the field until a value is entered. This hint is usually a sample value.'),
     ];
 
@@ -88,19 +88,19 @@ class AccessionReferenceWidget extends WidgetBase {
   public function settingsSummary() {
     $summary = [];
 
-    $main_min = $this->getSetting('main_min');
-    $summary[] = $this->t('Main minimum: @main_min', ['@main_min' => $main_min]);
-    $main_max = $this->getSetting('main_max');
-    $summary[] = $this->t('Main maximum: @main_max', ['@main_max' => $main_max]);
-    $sub_min = $this->getSetting('sub_min');
-    $summary[] = $this->t('Sub minimum: @sub_min', ['@sub_min' => $sub_min]);
-    $sub_max = $this->getSetting('sub_max');
-    $summary[] = $this->t('Sub maximum: @sub_max', ['@sub_max' => $sub_max]);
+    $summary[] = $this->t('Groupref range: @groupref_min .. @groupref_max',
+      ['@groupref_min' => $this->getSetting('groupref_min'),
+        '@groupref_max' => $this->getSetting('groupref_max')]);
 
-    $placeholder1 = $this->getSetting('main_placeholder');
-    $summary[] = $this->t('Main Placeholder: @main_placeholder', ['@main_placeholder' => $placeholder1]);
-    $placeholder2 = $this->getSetting('sub_placeholder');
-    $summary[] = $this->t('Sub Placeholder: @sub_placeholder', ['@sub_placeholder' => $placeholder2]);
+    $placeholder1 = $this->getSetting('groupref_placeholder');
+    $summary[] = $this->t('Groupref Placeholder: @groupref_placeholder', ['@groupref_placeholder' => $placeholder1]);
+
+    $summary[] = $this->t('Itemref range: @itemref_min .. @itemref_max',
+      ['@itemref_min' => $this->getSetting('itemref_min'),
+        '@itemref_max' => $this->getSetting('itemref_max')]);
+
+    $placeholder2 = $this->getSetting('itemref_placeholder');
+    $summary[] = $this->t('Itemref Placeholder: @itemref_placeholder', ['@itemref_placeholder' => $placeholder2]);
 
     return $summary;
   }
@@ -110,66 +110,75 @@ class AccessionReferenceWidget extends WidgetBase {
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
 
-    $value = $items[$delta]->value ?? NULL;
-    $value_sub = $items[$delta]->value_sub ?? NULL;
+    $groupref = $items[$delta]->groupref ?? '';
+    $itemref = $items[$delta]->itemref ?? '';
 
-    $storagesettings = $this->fieldDefinition->getFieldStorageDefinition();
-    $settings = $this->getFieldSettings();
+    $field_settings = $this->getFieldSettings();
+    $settings = $this->getSettings();
 
-    $value_min = $value_sub_min = 0;
-    $digits_min = $digits_sub_min = 1;
-    $value_max = 9_999;
-    $digits_max = 4;
-    $value_sub_max = 9_999;
-    $digits_sub_max = 4;
+    $groupref_min = $itemref_min = 0;
+    $digits_groupref_min = $digits_itemref_min = 1;
+    $groupref_max = 9_999;
+    $digits_groupref_max = 4;
+    $itemref_max = 9_999;
+    $digits_itemref_max = 4;
 
-    $settings += [
-      'main_min' => '1',
-      'main_max' => '9999',
-      'main_placeholder' => '',
-      'sub_min' => '1',
-      'sub_max' => '9999',
-      'sub_placeholder' => '',
+    $field_settings += [
+      'groupref_min' => '1',
+      'groupref_max' => '9999',
+      'groupref_placeholder' => '',
+      'itemref_min' => '1',
+      'itemref_max' => '9999',
+      'itemref_placeholder' => '',
     ];
 
-    if (is_numeric($settings['main_min'])) {
-      $value_min = $settings['main_min'];
-      $digits_min = strlen((string) $settings['main_min']);
+    if (is_numeric($field_settings['groupref_min'])) {
+      $groupref_min = max($groupref_min, $field_settings['groupref_min']);
+      $digits_groupref_min = strlen((string) $groupref_min);
     }
-    if (is_numeric($settings['main_max'])) {
-      $value_max = $settings['main_max'];
-      $digits_max = strlen((string) $settings['main_max']);
+    if (is_numeric($field_settings['groupref_max'])) {
+      $groupref_max = max($groupref_min, $field_settings['groupref_max']);
+      $digits_groupref_max = strlen((string) $groupref_max);
     }
-    if (is_numeric($settings['sub_min'])) {
-      $value_sub_min = $settings['sub_min'];
-      $digits_sub_min = strlen((string) $settings['sub_min']);
+    if (is_numeric($field_settings['itemref_min'])) {
+      $itemref_min = max($itemref_min, $field_settings['itemref_min']);
+      $digits_itemref_min = strlen((string) $itemref_min);
     }
-    if (is_numeric($settings['sub_max'])) {
-      $value_sub_max = $settings['sub_max'];
-      $digits_sub_max = strlen((string) $settings['sub_max']);
+    if (is_numeric($field_settings['itemref_max'])) {
+      $itemref_max = max($itemref_min, $field_settings['itemref_max']);
+      $digits_itemref_max = strlen((string) $itemref_max);
     }
 
     $element['value'] = [
       '#type' => 'accession_reference_widget',
+      '#settings' => $settings,
+      '#field_settings' => $field_settings,
 
       '#title' => $element['#title'] ?? '',
+      '#title_display' =>  $element['title_display'] ?? 'before',
       '#required' => $element['#required'] ?? FALSE,
       '#description' => $element['#description'] ?? '',
-      '#description__display' => $element['#description_display'] ?? 'after',
+      '#description_display' => $element['#description_display'] ?? 'after',
 
-      '#main_value' => $value ?? '',
-      '#main_tip' => $this->t("Range: @min - @max", ['@min' => $value_min, '@max' => $value_max]),
-      '#main_size' => $digits_max,
-      '#main_placeholder' => $this->getSetting('main_placeholder') ?? '',
-      '#main_pattern' => '\d{'.$digits_min.','.$digits_max.'}',
+      'groupref' => [
+        '#groupref' => $groupref,
+        '#tip' => $this->t("Range: @min - @max", ['@min' => $groupref_min, '@max' => $groupref_max]),
+        '#size' => $digits_groupref_max,
+        '#placeholder' => $this->getSetting('groupref_placeholder') ?? '',
+        '#pattern' => '\d{'.$digits_groupref_min.','.$digits_groupref_max.'}',
+        '#attributes' => new Attribute(),
+      ],
 
-      '#separator' => $storagesettings->getSetting('separator'),
+      '#separator' => $field_settings['separator'],
 
-      '#sub_value' => $value_sub ?? '',
-      '#sub_tip' => "Range: $value_sub_min - $value_sub_max",
-      '#sub_size' => $digits_sub_max,
-      '#sub_placeholder' => $this->getSetting('sub_placeholder') ?? '',
-      '#sub_pattern' => '\d{'.$digits_sub_min.','.$digits_sub_max.'}',
+      'itemref' => [
+        '#itemref' => $itemref,
+        '#tip' => $this->t("Range: @min - @max", ['@min' => $itemref_min, '@max' => $itemref_max]),
+        '#size' => $digits_itemref_max,
+        '#placeholder' => $this->getSetting('itemref_placeholder') ?? '',
+        '#pattern' => '\d{'.$digits_itemref_min.','.$digits_itemref_max.'}',
+        '#attributes' => new Attribute(),
+      ],
 
       '#attributes' => new Attribute(),
 

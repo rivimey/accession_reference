@@ -27,19 +27,19 @@ class AccessionReferenceFormatter extends FormatterBase {
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    $elements['zeropad_main'] = [
+    $elements['zeropad_groupref'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Zero Pad main value'),
-      '#description' => $this->t('Prefix main value with zeroes up to max value digits.'),
-      '#default_value' => $this->getSetting('zeropad_main'),
+      '#title' => $this->t('Zero Pad groupref'),
+      '#description' => $this->t('Prefix groupref with zeroes up to max value digits.'),
+      '#default_value' => $this->getSetting('zeropad_groupref'),
       '#weight' => 10,
     ];
 
-    $elements['zeropad_sub'] = [
+    $elements['zeropad_itemref'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Zero Pad sub value'),
-      '#description' => $this->t('Prefix sub value with zeroes up to max value digits.'),
-      '#default_value' => $this->getSetting('zeropad_sub'),
+      '#title' => $this->t('Zero Pad item ref'),
+      '#description' => $this->t('Prefix item ref with zeroes up to max value digits.'),
+      '#default_value' => $this->getSetting('zeropad_itemref'),
       '#weight' => 10,
     ];
 
@@ -54,11 +54,13 @@ class AccessionReferenceFormatter extends FormatterBase {
 
     $summary[] = $this->t('Ref padding (@pm, @ps).',
       [
-        "@pm" => $this->getSetting('zeropad_main') ? $this->t('Yes') :  $this->t('No'),
-        "@ps" => $this->getSetting('zeropad_sub') ? $this->t('Yes') :  $this->t('No'),
+        "@pm" => $this->getSetting('zeropad_groupref') ? $this->t('Yes') :  $this->t('No'),
+        "@ps" => $this->getSetting('zeropad_itemref') ? $this->t('Yes') :  $this->t('No'),
       ]);
-    $summary[] = $this->numberFormat(1234,5678);
-
+    $summary[] = $this->t('Example for 12/34: @style.',
+      [
+        "@style" => $this->numberFormat(12,34),
+      ]);
     return $summary;
   }
 
@@ -67,20 +69,20 @@ class AccessionReferenceFormatter extends FormatterBase {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
-    $separator = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('separator');
-    $settings = $this->getFieldSettings();
+    $field_settings = $this->getFieldSettings();
+    $settings = $this->getSettings();
 
     foreach ($items as $delta => $item) {
-      //$output = $this->numberFormat($item->value, $item->sub_value);
+      //$output = $this->numberFormat($item->groupref, $item->itemref);
       $elements[$delta] = [
         '#type' => 'accession_reference',
-        '#main' => $item->value,
-        '#sub' => $item->sub_value,
-        '#sep' => $separator,
-        '#digits_main' => (strlen((string)$settings['main_max']) ?: 9999),
-        '#digits_sub' => (strlen((string)$settings['sub_max']) ?: 9999),
-        '#zeropad_main' => $settings['zeropad_main'],
-        '#zeropad_sub' => $settings['zeropad_sub'],
+        '#groupref' => $item->groupref,
+        '#itemref' => $item->itemref,
+        '#sep' => $field_settings['separator'],
+        '#digits_groupref' => (strlen((string)$field_settings['groupref_max']) ?: 4),
+        '#digits_itemref' => (strlen((string)$field_settings['itemref_max']) ?: 4),
+        '#zeropad_groupref' => $settings['zeropad_groupref'],
+        '#zeropad_itemref' => $settings['zeropad_itemref'],
       ];
     }
 
@@ -92,8 +94,8 @@ class AccessionReferenceFormatter extends FormatterBase {
    */
   public static function defaultSettings() {
     return [
-      'zeropad_main' => FALSE,
-      'zeropad_sub' => TRUE,
+      'zeropad_groupref' => FALSE,
+      'zeropad_itemref' => TRUE,
     ] + parent::defaultSettings();
   }
 
@@ -101,12 +103,16 @@ class AccessionReferenceFormatter extends FormatterBase {
    * {@inheritdoc}
    */
   protected function numberFormat($number, $number2) {
-    $separator = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('separator');
-    $settings = $this->getFieldSettings();
-    $digits_main = strlen((string)$settings['main_max']) ?: 9999;
-    $digits_sub = strlen((string)$settings['sub_max']) ?: 9999;
-    $format = '%1$0'.$digits_main.'d'.'%3$s'.'%2$0'.$digits_sub.'d';
-    return sprintf($format, $number, $number2, $separator);
+    $field_settings = $this->getFieldSettings();
+    $settings = $this->getSettings();
+    $dgt_grp = strlen((string)($field_settings['groupref_max']) ?: 9999);
+    $dgt_itm = strlen((string)($field_settings['itemref_max']) ?: 9999);
+    $zp_grp = $settings['zeropad_groupref'] ? '0' : '';
+    $zp_itm = $settings['zeropad_itemref'] ? '0' : '';
+
+    $format = '%1$'.$zp_grp.$dgt_grp.'d'.'%3$s'.'%2$'.$zp_itm.$dgt_itm.'d';
+
+    return sprintf($format, $number, $number2, $field_settings['separator']);
   }
 
 }

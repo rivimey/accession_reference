@@ -39,7 +39,7 @@ class AccessionReferenceItem extends FieldItemBase implements AccessionReference
    * {@inheritdoc}
    */
   public function isEmpty() {
-    return empty($this->value) && empty($this->sub_value);
+    return empty($this->groupref) && empty($this->itemref);
   }
 
   /**
@@ -52,53 +52,53 @@ class AccessionReferenceItem extends FieldItemBase implements AccessionReference
     $settings = $this->getSettings();
     $label = $this->getFieldDefinition()->getLabel();
 
-    if (isset($settings['main_min']) && $settings['main_min'] !== '') {
-      $main_min = $settings['main_min'];
+    if (isset($settings['groupref_min']) && $settings['groupref_min'] !== '') {
+      $groupref_min = $settings['groupref_min'];
       $constraints[] = $constraint_manager->create('ComplexData', [
-        'value' => [
+        'groupref' => [
           'Range' => [
-            'min' => $main_min,
-            'minMessage' => $this->t('%name: the value may be no less than %min.',
-              ['%name' => $label, '%min' => $main_min]),
+            'min' => $groupref_min,
+            'minMessage' => $this->t('%name: the group ref may be no less than %min.',
+              ['%name' => $label, '%min' => $groupref_min]),
           ],
         ],
       ]);
     }
 
-    if (isset($settings['sub_min']) && $settings['sub_min'] !== '') {
-      $sub_min = $settings['sub_min'];
+    if (isset($settings['itemref_min']) && $settings['itemref_min'] !== '') {
+      $itemref_min = $settings['itemref_min'];
       $constraints[] = $constraint_manager->create('ComplexData', [
-        'sub_value' => [
+        'itemref' => [
           'Range' => [
-            'min' => $sub_min,
-            'minMessage' => $this->t('%name: the sub value may be no less than %min.',
-              ['%name' => $label, '%min' => $sub_min]),
+            'min' => $itemref_min,
+            'minMessage' => $this->t('%name: the item ref may be no less than %min.',
+              ['%name' => $label, '%min' => $itemref_min]),
           ],
         ],
       ]);
     }
 
-    if (isset($settings['main_max']) && $settings['main_max'] !== '') {
-      $main_max = $settings['main_max'];
+    if (isset($settings['groupref_max']) && $settings['groupref_max'] !== '') {
+      $groupref_max = $settings['groupref_max'];
       $constraints[] = $constraint_manager->create('ComplexData', [
-        'main_value' => [
+        'groupref' => [
           'Range' => [
-            'max' => $main_max,
-            'maxMessage' => $this->t('%name: the value may be no greater than %max.',
-              ['%name' => $label, '%max' => $main_max]),
+            'max' => $groupref_max,
+            'maxMessage' => $this->t('%name: the group ref may be no greater than %max.',
+              ['%name' => $label, '%max' => $groupref_max]),
           ],
         ],
       ]);
     }
 
-    if (isset($settings['sub_max']) && $settings['sub_max'] !== '') {
-      $sub_max = $settings['sub_max'];
+    if (isset($settings['itemref_max']) && $settings['itemref_max'] !== '') {
+      $itemref_max = $settings['itemref_max'];
       $constraints[] = $constraint_manager->create('ComplexData', [
-        'sub_value' => [
+        'itemref' => [
           'Range' => [
-            'max' => $sub_max,
-            'maxMessage' => $this->t('%name: the sub value may be no greater than %max.',
-              ['%name' => $label, '%max' => $sub_max ]),
+            'max' => $itemref_max,
+            'maxMessage' => $this->t('%name: the item ref may be no greater than %max.',
+              ['%name' => $label, '%max' => $itemref_max ]),
           ],
         ],
       ]);
@@ -113,7 +113,7 @@ class AccessionReferenceItem extends FieldItemBase implements AccessionReference
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
     return [
       'columns' => [
-        'value' => [
+        'groupref' => [
           'type' => 'int',
           'description' => 'The group number of the reference.',
           'unsigned' => TRUE,
@@ -122,7 +122,7 @@ class AccessionReferenceItem extends FieldItemBase implements AccessionReference
           'size' => 'normal',
           'default' => 0,
         ],
-        'sub_value' => [
+        'itemref' => [
           'type' => 'int',
           'description' => 'The item number of the reference.',
           'unsigned' => TRUE,
@@ -139,7 +139,7 @@ class AccessionReferenceItem extends FieldItemBase implements AccessionReference
         ],
       ],
       'indexes' => [
-        'value_sub_value' => ['value', 'sub_value'],
+        'value' => ['groupref', 'itemref'],
       ],
     ];
   }
@@ -172,11 +172,11 @@ class AccessionReferenceItem extends FieldItemBase implements AccessionReference
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
-    $properties['value'] = DataDefinition::create('integer')
+    $properties['groupref'] = DataDefinition::create('integer')
       ->setLabel(new TranslatableMarkup('Main'))
       ->setRequired(TRUE);
 
-    $properties['sub_value'] = DataDefinition::create('integer')
+    $properties['itemref'] = DataDefinition::create('integer')
       ->setLabel(new TranslatableMarkup('Sub'))
       ->setRequired(TRUE);
 
@@ -191,13 +191,13 @@ class AccessionReferenceItem extends FieldItemBase implements AccessionReference
    * @throws \Exception
    */
   public static function generateSampleValue(FieldDefinitionInterface $field_definition) {
-    $min = $field_definition->getSetting('main_min') ?: 1000;
-    $max = $field_definition->getSetting('main_max') ?: 9000;
-    $values['value'] = random_int($min, $max);
+    $min = $field_definition->getSetting('groupref_min') ?: 1000;
+    $max = $field_definition->getSetting('groupref_max') ?: 9000;
+    $values['groupref'] = random_int($min, $max);
 
-    $min = $field_definition->getSetting('sub_min') ?: 1;
-    $max = $field_definition->getSetting('sub_max') ?: 999;
-    $values['sub_value'] = random_int($min, $max);
+    $min = $field_definition->getSetting('itemref_min') ?: 1;
+    $max = $field_definition->getSetting('itemref_max') ?: 999;
+    $values['itemref'] = random_int($min, $max);
 
     return $values;
   }

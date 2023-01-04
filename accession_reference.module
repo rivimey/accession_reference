@@ -7,26 +7,68 @@ function accession_reference_theme(): array {
   $item = ['render element' => 'elements'];
   return [
     'accession_reference_item' => $item,
-    'accession_reference_subfield' => $item,
-    'accession_reference_definition_list' => $item,
+    'accession_reference_widget' => $item,
   ];
 }
 
 /**
- * Prepares variables for double-field-item template.
+ * @param array $variables
+ * @return void
  */
-function template_preprocess_accession_reference_item(array &$variables): void {
-  $variables['settings'] = $variables['elements']['#settings'];
-  $variables['field_settings'] = $variables['elements']['#field_settings'];
-  $variables['item']['value'] = $variables['elements']['#item']->value;
-  $variables['item']['sub_value'] = $variables['elements']['#item']->sub_value;
+function accession_reference_common_preprocess(array &$variables): void {
+  $variables['settings'] = $variables['elements']['#settings'] ?? [];
+  $variables['field_settings'] = $variables['elements']['#field_settings'] ?? [];
+
+  if (!empty($variables['elements']['#item'])) {
+    $variables['item']['groupref'] = $variables['elements']['#item']->groupref;
+    $variables['item']['separator'] = $variables['elements']['#separator'] ?? '/';
+    $variables['item']['itemref'] = $variables['elements']['#item']->itemref;
+  }
+  else {
+    $variables['item']['groupref'] = [
+      'attributes' => $variables['elements']['groupref']['#attributes'],
+      'value' => $variables['elements']['groupref']['#groupref'],
+    ];
+    $variables['item']['separator'] = $variables['elements']['#separator'] ?? '/';
+    $variables['item']['itemref'] = [
+      'attributes' => $variables['elements']['itemref']['#attributes'],
+      'value' => $variables['elements']['itemref']['#itemref'],
+    ];
+  }
+}
+
+/**
+ * Prepares variables for accession reference item template.
+ */
+function accession_reference_preprocess_accession_reference_item(array &$variables): void {
+  accession_reference_common_preprocess($variables);
+}
+
+/**
+ * Prepares variables for accession reference widget template.
+ */
+function accession_reference_preprocess_accession_reference_widget(array &$variables): void {
+  accession_reference_common_preprocess($variables);
 }
 
 /**
  * Implements hook_theme_suggestions_HOOK().
  */
 function accession_reference_theme_suggestions_accession_reference_item(array $variables): array {
-  return [
-    'accession_reference_item__' . $variables['elements']['#field_name']
-  ];
+  $field_name = $variables['elements']['#field_name'] ?? '';
+  if (!empty($field_name)) {
+    return ['accession_reference_item__' . $field_name];
+  }
+  return [];
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function accession_reference_theme_suggestions_accession_reference_widget(array $variables): array {
+  $field_name = $variables['elements']['#field_name'] ?? '';
+  if (!empty($field_name)) {
+    return ['accession_reference_widget__' . $field_name];
+  }
+  return [];
 }

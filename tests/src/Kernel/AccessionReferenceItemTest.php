@@ -40,7 +40,7 @@ class AccessionReferenceItemTest extends FieldKernelTestBase {
       'entity_type' => 'entity_test',
       'field_name' => 'field_test',
       'bundle' => 'entity_test',
-      'default_value' => [0 => ['value' => '6789', 'sub_value' => '2333']],
+      'default_value' => [0 => ['groupref' => '6789', 'itemref' => '2333']],
     ])->save();
   }
 
@@ -50,10 +50,10 @@ class AccessionReferenceItemTest extends FieldKernelTestBase {
   public function testTestItem() {
     // Verify entity creation.
     $entity = EntityTest::create();
-    $value = 6789;
-    $sub_value = 2333;
-    $entity->field_test = $value;
-    $entity->field_test->sub_value = $sub_value;
+    $groupref = 6789;
+    $itemref = 2333;
+    $entity->field_test->groupref = $groupref;
+    $entity->field_test->itemref = $itemref;
     $entity->name->value = $this->randomMachineName();
     $entity->save();
 
@@ -62,20 +62,23 @@ class AccessionReferenceItemTest extends FieldKernelTestBase {
     $entity = EntityTest::load($id);
     $this->assertInstanceOf(FieldItemListInterface::class, $entity->field_test);
     $this->assertInstanceOf(FieldItemInterface::class, $entity->field_test[0]);
-    $this->assertEquals($value, $entity->field_test->value);
-    $this->assertEquals($value, $entity->field_test[0]->value);
-    $this->assertEquals($sub_value, $entity->field_test->sub_value);
-    $this->assertEquals($sub_value, $entity->field_test[0]->sub_value);
+    $this->assertEquals($groupref, $entity->field_test->groupref);
+    $this->assertEquals($groupref, $entity->field_test[0]->groupref);
+    $this->assertEquals($itemref, $entity->field_test->itemref);
+    $this->assertEquals($itemref, $entity->field_test[0]->itemref);
 
     // Verify changing the field value.
     $new_value = rand(1000, 9999);
-    $entity->field_test->value = $new_value;
-    $this->assertEquals($new_value, $entity->field_test->value);
+    $entity->field_test->groupref = $new_value;
+    $entity->field_test->itemref = $new_value;
+    $this->assertEquals($new_value, $entity->field_test->groupref);
+    $this->assertEquals($new_value, $entity->field_test->itemref);
 
     // Read changed entity and assert changed values.
     $entity->save();
     $entity = EntityTest::load($id);
-    $this->assertEquals($new_value, $entity->field_test->value);
+    $this->assertEquals($new_value, $entity->field_test->groupref);
+    $this->assertEquals($new_value, $entity->field_test->itemref);
 
     // Test sample item generation.
     $entity = EntityTest::create();

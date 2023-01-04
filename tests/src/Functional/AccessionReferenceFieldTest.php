@@ -72,8 +72,8 @@ class AccessionReferenceFieldTest extends BrowserTestBase {
       ->setComponent('field_accession_reference', [
         'type' => 'accession_reference',
         'settings' => [
-          'main_placeholder' => '1234',
-          'sub_placeholder' => '4321',
+          'groupref_placeholder' => '1234',
+          'itemref_placeholder' => '4321',
         ],
       ])
       ->save();
@@ -111,8 +111,8 @@ class AccessionReferenceFieldTest extends BrowserTestBase {
     // Test basic entry of accession_reference field.
     $edit = [
       'title[0][value]' => $this->randomMachineName(),
-      'field_accession_reference[0][value]' => $val,
-      'field_accession_reference[0][sub_value]' => $sub,
+      'field_accession_reference[0][groupref]' => $val,
+      'field_accession_reference[0][itemref]' => $sub,
     ];
 
     $this->drupalGet('node/add/article');

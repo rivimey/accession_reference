@@ -5,48 +5,48 @@ field.formatter.settings.accession_reference:
   type: mapping
   label: 'Accession Reference format settings'
   mapping:
-    zeropad_main:
+    zeropad_groupref:
       type: boolean
-      label: 'Zero Pad the Main value'
-    zeropad_sub:
+      label: 'Zero Pad the Group ref'
+    zeropad_itemref:
       type: boolean
-      label: 'Zero Pad the Sub value'
+      label: 'Zero Pad the Item ref'
 
 # Widget schema.
 field.widget.settings.accession_reference:
   type: mapping
   label: 'Accession Reference format settings'
   mapping:
-    main_placeholder:
+    groupref_placeholder:
       type: string
-      label: 'Placeholder for main value'
-    main_min:
+      label: 'Placeholder for groupref'
+    groupref_min:
       type: integer
-      label: 'Minimum value of the main value.'
-    main_max:
+      label: 'Minimum value of the groupref.'
+    groupref_max:
       type: integer
-      label: 'Maximum value of the main value.'
-    sub_placeholder:
+      label: 'Maximum value of the groupref.'
+    itemref_placeholder:
       type: string
-      label: 'Placeholder for sub value'
-    sub_min:
+      label: 'Placeholder for item ref'
+    itemref_min:
       type: integer
-      label: 'Minimum value of the main value.'
-    sub_max:
+      label: 'Minimum value of the groupref.'
+    itemref_max:
       type: integer
-      label: 'Maximum value of the sub field'
+      label: 'Maximum value of the itemref field'
 
 # Storage schema.
 field.storage_settings.accession_reference:
   type: mapping
-  label: 'Accession Reference settings'
+  label: 'Accession Reference data'
   mapping:
-    value:
+    groupref:
       type: string
-      label: 'Main value'
-    sub_value:
+      label: 'Group ref'
+    itemref:
       type: string
-      label: 'Sub value'
+      label: 'Item ref'
     options:
       type: mapping
       label: 'Accession Reference options'
@@ -58,19 +58,19 @@ field.field_settings.accession_reference:
   mapping:
     separator:
       type: string
-      label: 'Value separator character'
+      label: 'Reference separator character'
 
 # Default value schema.
 field.value.accession_reference:
   type: mapping
   label: 'Default value'
   mapping:
-    value:
+    groupref:
       type: string
-      label: 'Main value'
-    sub_value:
+      label: 'Group ref'
+    itemref:
       type: string
-      label: 'Sub value'
+      label: 'Item ref'
     options:
       type: mapping
       label: 'Accession Reference options'
