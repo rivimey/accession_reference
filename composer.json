@@ -1,0 +1,9 @@
+{
+  "name": "rivimey/accession_reference",
+  "description": "Accession Reference field type.",
+  "type": "drupal-module",
+  "homepage": "https://git.ivimey.org/rivimey/accession_reference",
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev",
+  "require": {}
+}
