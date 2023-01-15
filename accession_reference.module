@@ -1,5 +1,7 @@
 <?php
 
+use \Drupal\Core\Template\Attribute;
+
 /**
  * Implements hook_theme().
  */
@@ -16,25 +18,27 @@ function accession_reference_theme(): array {
  * @return void
  */
 function accession_reference_common_preprocess(array &$variables): void {
-  $variables['settings'] = $variables['elements']['#settings'] ?? [];
-  $variables['field_settings'] = $variables['elements']['#field_settings'] ?? [];
+  $elements = $variables['elements'];
+  $variables['title'] = $elements['#title'];
+  $variables['title_display'] = $elements['#title_display'];
+  $variables['title_attributes'] = $elements['#title_attributes'] ?? new Attribute();
 
-  if (!empty($variables['elements']['#item'])) {
-    $variables['item']['groupref'] = $variables['elements']['#item']->groupref;
-    $variables['item']['separator'] = $variables['elements']['#separator'] ?? '/';
-    $variables['item']['itemref'] = $variables['elements']['#item']->itemref;
-  }
-  else {
-    $variables['item']['groupref'] = [
-      'attributes' => $variables['elements']['groupref']['#attributes'],
-      'value' => $variables['elements']['groupref']['#groupref'],
-    ];
-    $variables['item']['separator'] = $variables['elements']['#separator'] ?? '/';
-    $variables['item']['itemref'] = [
-      'attributes' => $variables['elements']['itemref']['#attributes'],
-      'value' => $variables['elements']['itemref']['#itemref'],
-    ];
-  }
+  $variables['description'] = $elements['#description'];
+  $variables['description_display'] = $elements['#description_display'];
+  $variables['description_attributes'] = $elements['#description_attributes'] ?? new Attribute();
+
+  $variables['content']['groupref'] = [
+    'attributes' => new Attribute($elements['groupref']['#attributes']),
+    'value' => $elements['groupref']['#default_value'],
+  ];
+  $variables['content']['separator'] = [
+    'attributes' => new Attribute($elements['separator']['#attributes']),
+    'value' => $elements['separator']['#value'],
+  ];
+  $variables['content']['itemref'] = [
+    'attributes' => new Attribute($elements['itemref']['#attributes']),
+    'value' => $elements['itemref']['#default_value'],
+  ];
 }
 
 /**

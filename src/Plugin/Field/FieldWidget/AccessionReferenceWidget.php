@@ -108,20 +108,24 @@ class AccessionReferenceWidget extends WidgetBase {
   /**
    * {@inheritdoc}
    */
+  public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
+    return $values;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
 
     $groupref = $items[$delta]->groupref ?? '';
     $itemref = $items[$delta]->itemref ?? '';
 
     $field_settings = $this->getFieldSettings();
-    $settings = $this->getSettings();
-
     $groupref_min = $itemref_min = 0;
-    $digits_groupref_min = $digits_itemref_min = 1;
     $groupref_max = 9_999;
-    $digits_groupref_max = 4;
+    $digits_groupref = 4;
     $itemref_max = 9_999;
-    $digits_itemref_max = 4;
+    $digits_itemref = 4;
 
     $field_settings += [
       'groupref_min' => '1',
@@ -134,53 +138,38 @@ class AccessionReferenceWidget extends WidgetBase {
 
     if (is_numeric($field_settings['groupref_min'])) {
       $groupref_min = max($groupref_min, $field_settings['groupref_min']);
-      $digits_groupref_min = strlen((string) $groupref_min);
     }
     if (is_numeric($field_settings['groupref_max'])) {
       $groupref_max = max($groupref_min, $field_settings['groupref_max']);
-      $digits_groupref_max = strlen((string) $groupref_max);
+      $digits_groupref = strlen((string) $groupref_max);
     }
     if (is_numeric($field_settings['itemref_min'])) {
       $itemref_min = max($itemref_min, $field_settings['itemref_min']);
-      $digits_itemref_min = strlen((string) $itemref_min);
     }
     if (is_numeric($field_settings['itemref_max'])) {
       $itemref_max = max($itemref_min, $field_settings['itemref_max']);
-      $digits_itemref_max = strlen((string) $itemref_max);
+      $digits_itemref = strlen((string) $itemref_max);
     }
 
     $element['value'] = [
       '#type' => 'accession_reference_widget',
-      '#settings' => $settings,
-      '#field_settings' => $field_settings,
 
       '#title' => $element['#title'] ?? '',
       '#title_display' =>  $element['title_display'] ?? 'before',
-      '#required' => $element['#required'] ?? FALSE,
       '#description' => $element['#description'] ?? '',
       '#description_display' => $element['#description_display'] ?? 'after',
 
-      'groupref' => [
-        '#groupref' => $groupref,
-        '#tip' => $this->t("Range: @min - @max", ['@min' => $groupref_min, '@max' => $groupref_max]),
-        '#size' => $digits_groupref_max,
-        '#placeholder' => $this->getSetting('groupref_placeholder') ?? '',
-        '#pattern' => '\d{'.$digits_groupref_min.','.$digits_groupref_max.'}',
-        '#attributes' => new Attribute(),
-      ],
+      '#groupref_required' => $element['#required'] ?? FALSE,
+      '#groupref_tip' => $this->t("Range: @min - @max", ['@min' => $groupref_min, '@max' => $groupref_max]),
+      '#groupref_placeholder' => $this->getSetting('groupref_placeholder') ?? '',
 
       '#separator' => $field_settings['separator'],
 
-      'itemref' => [
-        '#itemref' => $itemref,
-        '#tip' => $this->t("Range: @min - @max", ['@min' => $itemref_min, '@max' => $itemref_max]),
-        '#size' => $digits_itemref_max,
-        '#placeholder' => $this->getSetting('itemref_placeholder') ?? '',
-        '#pattern' => '\d{'.$digits_itemref_min.','.$digits_itemref_max.'}',
-        '#attributes' => new Attribute(),
-      ],
+      '#itemref_required' => $element['#required'] ?? FALSE,
+      '#itemref_tip' => $this->t("Range: @min - @max", ['@min' => $itemref_min, '@max' => $itemref_max]),
+      '#itemref_placeholder' => $this->getSetting('itemref_placeholder') ?? '',
 
-      '#attributes' => new Attribute(),
+      '#attributes' => [],
 
       '#attached' => [
         'library' => [

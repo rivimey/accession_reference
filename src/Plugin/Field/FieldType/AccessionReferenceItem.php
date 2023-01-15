@@ -148,7 +148,7 @@ class AccessionReferenceItem extends FieldItemBase implements AccessionReference
    * {@inheritdoc}
    */
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
-    $element = parent::fieldSettingsForm($form, $form_state);
+    $elements = parent::fieldSettingsForm($form, $form_state);
 
     $options = [
       '.' => $this->t('Decimal point'),

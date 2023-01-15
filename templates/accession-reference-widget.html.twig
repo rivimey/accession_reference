@@ -1,88 +1,71 @@
 {#
   Twig renderer for the Accession Reference Widget. Variables available include:
-
-  "elements" => [
-    "#type" => "accession_reference_widget"
-    "#title" => "GERS Accession Reference"
-    "#required" => false
-    "#description" => ""
-    "#description_display" => "after"
-    "#title_display" => "before"
-    "groupref" => [
-      "#groupref" => ""
-      "#tip" => Drupal\Core\StringTranslation\TranslatableMarkup
-      "#size" => 4
-      "#placeholder" => ""
-      "#pattern" => "\d{1,4}"
-      "#attributes" => Drupal\Core\Template\Attribute
-      "#tree" => true
-      "#weight" => 0
-      "#processed" => false
-      "#required" => false
-      // notused:
-      "#title_display" => "before"
-      // notused:
-      "#description_display" => "after"
-      "#errors" => null
-      "#id" => "edit-default-value-input-field-accession-reference-0-value-groupref"
-      "#sorted" => true
-    ]
-    "#separator" => null
-    "itemref" => [
-      "#itemref" => ""
-      "#tip" => Drupal\Core\StringTranslation\TranslatableMarkup
-      "#size" => 4
-      "#placeholder" => ""
-      "#pattern" => "\d{1,4}"
-      "#attributes" => Drupal\Core\Template\Attribute
-      "#tree" => true
-      "#weight" => 0.001
-      "#required" => false
-      // notused:
-      "#title_display" => "before"
-      // notused:
-      "#description_display" => "after"
-      "#errors" => null
-      "#id" => "edit-default-value-input-field-accession-reference-0-value-itemref"
-      "#sorted" => true
-    ]
-    "#attributes" => Drupal\Core\Template\Attribute
-    "#attached" => []
-    "#pre_render" => []
-    "#element_validate" => []
-    "#input" => true
-    "#multiple" => false
-    "#default_value" => []
-    "#theme" => "accession_reference_widget"
-    "#theme_wrappers" => []
-    "#value_callback" => []
-    "#tree" => true
-    "#weight" => 0
-    "#errors" => null
-    "#id" => "edit-default-value-input-field-accession-reference-0-value"
-    "#name" => "default_value_input[field_accession_reference][0][value]"
-    "#value" => []
-  ]
-  "theme_hook_original" => "accession_reference_widget"
-  "attributes" => Drupal\Core\Template\Attribute
-  "title_attributes" => Drupal\Core\Template\Attribute
-  "content_attributes" => Drupal\Core\Template\Attribute
-  "title_prefix" => []
-  "title_suffix" => []
-  "item" => [
-    "groupref" => 0,
-    "itemref" => 0,
-    "separator" => "/",
-  ],
-  "is_admin" => bool
-  "logged_in" => bool
-  "user" => Drupal\Core\Session\AccountProxy
-  "directory" => "themes/contrib/gin"
-  "settings" => null
-  "field_settings" => null
-  "theme_hook_suggestions" => []
 #}
-<span class="accession-reference groupref"><input{{ item.groupref.attributes }}/></span>
-<span class="accession-reference separator">{{ item.separator }}</span>
-<span class="accession-reference itemref"><input{{ item.itemref.attributes }}/></span>
-{{ children }}
+{{ dump() }}
+{% set label_attributes = title_attributes ? title_attributes : create_attribute() %}
+{% set wrapperclass = "form-check" %}
+{% set labelclass = "form-accession-reference--label" %}
+{% set inputclass = "form-accession-reference--input" %}
+{%
+  set classes = [
+  'js-form-item',
+  'js-form-type-' ~ type|clean_class,
+  'form-type-' ~ type|clean_class,
+  'js-form-item-' ~ name|clean_class,
+  'form-item-' ~ name|clean_class,
+  title_display not in ['after', 'before'] ? 'form-no-label',
+  disabled == 'disabled' ? 'disabled',
+  errors ? 'has-error',
+]
+%}
+{% if title_display == 'invisible' %}
+  {% if labelclass is defined %}
+    {% set labelclass = labelclass ~ ' visually-hidden' %}
+  {% else %}
+    {% set labelclass = 'visually-hidden' %}
+  {% endif %}
+{% endif %}
+{%
+  set description_classes = [
+  'description',
+  description_display == 'invisible' ? 'visually-hidden',
+]
+%}
+<div{{ attributes.addClass(classes) }}>
+  {% if description_display == 'before' and description %}
+    <div{{ description_attributes.addClass(description_classes) }}>
+      {{ description }}
+    </div>
+  {% endif %}
+  {% if prefix is not empty %}
+    <span class="field-prefix">{{ prefix }}</span>
+  {% endif %}
+  {% if label_display in ['before', 'invisible'] %}
+    <label {{ label_attributes.addClass(labelclass).setAttribute('for', input_attributes.id) }}>
+      {{ title | raw }}
+    </label>
+  {% endif %}
+
+  <span class="groupref"><input{{ content.groupref.attributes.addClass(inputclass) }}/></span>
+  <span class="separator">{{ content.separator.value }}</span>
+  <span class="itemref"><input{{ content.itemref.attributes.addClass(inputclass) }}/></span>
+
+  {% if label_display == 'after' %}
+    <label {{ label_attributes.addClass(labelclass).setAttribute('for', input_attributes.id) }}>
+      {{ title | raw }}
+    </label>
+  {% endif %}
+  {% if suffix is not empty %}
+    <span class="field-suffix">{{ suffix }}</span>
+  {% endif %}
+  {% if errors %}
+    <div class="invalid-feedback">
+      {{ errors }}
+    </div>
+  {% endif %}
+  {% if description_display in ['after', 'invisible'] and description %}
+    <small{{ description_attributes.addClass(description_classes).addClass('text-muted') }}>
+      {{ description }}
+    </small>
+  {% endif %}
+</div>
